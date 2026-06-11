@@ -13,66 +13,318 @@
       <h1>Quiz sur Tomodachi Life</h1>
       <p class="subtitle">Teste tes connaissances sur <strong>Tomodachi Life</strong>, le jeu de simulation de vie plein de personnages bizarres et de situations inattendues.</p>
     </section>
+    <section class="score-panel" id="score-panel" aria-live="polite" aria-atomic="true">
+      <div class="glitter-layer" id="glitter-layer" aria-hidden="true"></div>
+      <p class="score-label">Résultat</p>
+      <div class="score-visual">
+        <span class="score-emoji" id="score-emoji">🎮</span>
+        <div>
+          <p class="score-value" id="score-value">0/6</p>
+          <p class="score-message" id="score-message">Réponds aux questions puis corrige le quiz.</p>
+        </div>
+      </div>
+    </section>
 
     <section class="quiz-card">
-      <form>
-        <div class="question">
-          <h2>1. Sur quelle console Tomodachi Life est-il sorti ?</h2>
-          <label><input type="radio" name="q1" /> Nintendo Switch</label>
-          <label><input type="radio" name="q1" /> Nintendo 3DS</label>
-          <label><input type="radio" name="q1" /> Wii U</label>
-        </div>
+      <form id="quiz-form">
+        <div id="quiz-list" class="quiz-list"></div>
 
-        <div class="question">
-          <h2>2. Quel type de jeu est Tomodachi Life ?</h2>
-          <label><input type="radio" name="q2" /> Jeu de combat</label>
-          <label><input type="radio" name="q2" /> Simulation de vie</label>
-          <label><input type="radio" name="q2" /> Jeu de course</label>
-        </div>
-
-        <div class="question">
-          <h2>3. Quel mot décrit le mieux les personnages du jeu ?</h2>
-          <label><input type="radio" name="q3" /> Des Mii</label>
-          <label><input type="radio" name="q3" /> Des Pokémon</label>
-          <label><input type="radio" name="q3" /> Des Avatars VR</label>
-        </div>
-
-        <div class="question">
-          <h2>4. Quel est l'objectif principal du jeu ?</h2>
-          <label><input type="radio" name="q4" /> Gérer la vie de tes Mii</label>
-          <label><input type="radio" name="q4" /> Construire une ville en 3D</label>
-          <label><input type="radio" name="q4" /> Battre des boss</label>
-        </div>
-
-        <div class="question">
-          <h2>5. Quel élément rend le jeu souvent drôle ?</h2>
-          <label><input type="radio" name="q5" /> Les dialogues et les réactions absurdes</label>
-          <label><input type="radio" name="q5" /> Les courses de voitures</label>
-          <label><input type="radio" name="q5" /> Les armes puissantes</label>
-        </div>
-
-        <div class="question">
-          <h2>6. Comment s'appelle le jeu en anglais ?</h2>
-          <label><input type="radio" name="q6" /> Live the Dream</label>
-          <label><input type="radio" name="q6" /> Tomodachi Racing</label>
-          <label><input type="radio" name="q6" /> Dream Battle</label>
-        </div>
-
-        <button type="button">Corriger le quiz</button>
+        <button type="submit">Corriger le quiz</button>
       </form>
     </section>
 
-    <section class="answer-key">
-      <h2>Corrigé</h2>
-      <ul>
-        <li>1. Nintendo 3DS</li>
-        <li>2. Simulation de vie</li>
-        <li>3. Des Mii</li>
-        <li>4. Gérer la vie de tes Mii</li>
-        <li>5. Les dialogues et les réactions absurdes</li>
-        <li>6. Live the Dream</li>
-      </ul>
-    </section>
   </main>
+
+  <script>
+    const quizData = [
+      {
+        id: 'q1',
+        question: 'Sur quelle console Tomodachi Life est-il sorti ?',
+        correct: 'Nintendo 3DS',
+        options: ['Nintendo Switch', 'Nintendo 3DS', 'Wii U']
+      },
+      {
+        id: 'q2',
+        question: 'Quel type de jeu est Tomodachi Life ?',
+        correct: 'Simulation de vie',
+        options: ['Jeu de combat', 'Simulation de vie', 'Jeu de course']
+      },
+      {
+        id: 'q3',
+        question: 'Quel mot décrit le mieux les personnages du jeu ?',
+        correct: 'Des Mii',
+        options: ['Des Mii', 'Des Pokémon', 'Des Avatars VR']
+      },
+      {
+        id: 'q4',
+        question: "Quel est l'objectif principal du jeu ?",
+        correct: 'Gérer la vie de tes Mii',
+        options: ['Gérer la vie de tes Mii', 'Construire une ville en 3D', 'Battre des boss']
+      },
+      {
+        id: 'q5',
+        question: 'Quel élément rend le jeu souvent drôle ?',
+        correct: 'Les dialogues et les réactions absurdes',
+        options: ['Les dialogues et les réactions absurdes', 'Les courses de voitures', 'Les armes puissantes']
+      },
+      {
+        id: 'q6',
+        question: "Comment s'appelle le jeu en anglais ?",
+        correct: 'Live the Dream',
+        options: ['Live the Dream', 'Tomodachi Racing', 'Dream Battle']
+      }
+    ];
+
+    const storageKey = 'tomodachiLifeQuizResults';
+    const form = document.getElementById('quiz-form');
+    const scorePanel = document.getElementById('score-panel');
+    const scoreValue = document.getElementById('score-value');
+    const scoreMessage = document.getElementById('score-message');
+    const scoreEmoji = document.getElementById('score-emoji');
+    const quizList = document.getElementById('quiz-list');
+    const glitterLayer = document.getElementById('glitter-layer');
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    let activeMusicNodes = [];
+    let activeMusicTimeout = null;
+
+    function shuffle(values) {
+      const copied = [...values];
+
+      for (let index = copied.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [copied[index], copied[randomIndex]] = [copied[randomIndex], copied[index]];
+      }
+
+      return copied;
+    }
+
+    function renderQuiz() {
+      quizList.innerHTML = '';
+
+      quizData.forEach((item, index) => {
+        const questionBlock = document.createElement('div');
+        questionBlock.className = 'question';
+
+        const title = document.createElement('h2');
+        title.textContent = `${index + 1}. ${item.question}`;
+        questionBlock.appendChild(title);
+
+        shuffle(item.options).forEach((option, optionIndex) => {
+          const label = document.createElement('label');
+          label.className = 'option';
+
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = item.id;
+          input.value = option;
+
+          const optionLetter = document.createElement('span');
+          optionLetter.className = 'option-letter';
+          optionLetter.textContent = String.fromCharCode(65 + optionIndex);
+
+          const optionText = document.createElement('span');
+          optionText.textContent = option;
+
+          label.append(input, optionLetter, optionText);
+          questionBlock.appendChild(label);
+        });
+
+        quizList.appendChild(questionBlock);
+      });
+    }
+
+    function stopMusic() {
+      if (activeMusicTimeout) {
+        clearTimeout(activeMusicTimeout);
+        activeMusicTimeout = null;
+      }
+
+      for (const node of activeMusicNodes) {
+        try {
+          node.stop();
+        } catch {
+          // Ignore nodes that have already stopped.
+        }
+      }
+
+      activeMusicNodes = [];
+    }
+
+    function playTone({ frequency, startTime, duration, type = 'sine', gain = 0.06 }) {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, startTime);
+      gainNode.gain.setValueAtTime(0.0001, startTime);
+      gainNode.gain.exponentialRampToValueAtTime(gain, startTime + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration);
+
+      return { oscillator, gainNode };
+    }
+
+    function playClickSound() {
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+
+      const now = audioContext.currentTime;
+      playTone({ frequency: 520, startTime: now, duration: 0.06, type: 'square', gain: 0.03 });
+    }
+
+    function launchGlitter() {
+      glitterLayer.innerHTML = '';
+
+      for (let index = 0; index < 28; index += 1) {
+        const sparkle = document.createElement('span');
+        sparkle.className = 'sparkle';
+        sparkle.style.left = `${Math.random() * 100}%`;
+        sparkle.style.top = `${Math.random() * 45}%`;
+        sparkle.style.setProperty('--delay', `${Math.random() * 0.5}s`);
+        sparkle.style.setProperty('--duration', `${1.1 + Math.random() * 0.8}s`);
+        sparkle.style.setProperty('--size', `${8 + Math.random() * 14}px`);
+        sparkle.style.setProperty('--hue', `${Math.floor(Math.random() * 360)}deg`);
+        glitterLayer.appendChild(sparkle);
+      }
+
+      scorePanel.classList.add('celebrate');
+
+      window.setTimeout(() => {
+        glitterLayer.innerHTML = '';
+        scorePanel.classList.remove('celebrate');
+      }, 2200);
+    }
+
+    function playEndingMusic(isVictory) {
+      stopMusic();
+
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+
+      const now = audioContext.currentTime + 0.03;
+      const melody = isVictory
+        ? [659, 784, 988, 1175]
+        : [392, 349, 330, 294];
+
+      melody.forEach((frequency, index) => {
+        const startTime = now + index * 0.36;
+        const node = playTone({
+          frequency,
+          startTime,
+          duration: 0.32,
+          type: isVictory ? 'triangle' : 'sine',
+          gain: isVictory ? 0.08 : 0.06
+        });
+
+        activeMusicNodes.push(node.oscillator, node.gainNode);
+      });
+
+      const bassFrequency = isVictory ? 196 : 220;
+      const bass = playTone({
+        frequency: bassFrequency,
+        startTime: now,
+        duration: melody.length * 0.36 + 0.2,
+        type: 'sawtooth',
+        gain: 0.025
+      });
+
+      activeMusicNodes.push(bass.oscillator, bass.gainNode);
+
+      activeMusicTimeout = window.setTimeout(() => {
+        stopMusic();
+      }, 1800);
+    }
+
+    function getEmoji(score) {
+      const emojis = ['😵', '😟', '😐', '🙂', '😄', '🤩', '🏆'];
+      return emojis[score] || '🎮';
+    }
+
+    function getResultMessage(score, total) {
+      if (score < 5) {
+        return `Encore un effort : ${score}/${total}. La prochaine fois sera meilleure.`;
+      }
+
+      return `Bravo ! ${score}/${total}. Tu maîtrises Tomodachi Life.`;
+    }
+
+    function updateResult(score, total, celebrate = true) {
+      scoreValue.textContent = `${score}/${total}`;
+      scoreEmoji.textContent = getEmoji(score);
+      scoreMessage.textContent = getResultMessage(score, total);
+      scorePanel.classList.remove('success', 'warning');
+      scorePanel.classList.add(score >= 5 ? 'success' : 'warning');
+      scorePanel.classList.remove('pop');
+      void scorePanel.offsetWidth;
+      scorePanel.classList.add('pop');
+
+      if (celebrate && score >= 5) {
+        launchGlitter();
+      }
+    }
+
+    function loadResults() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveResults(results) {
+      localStorage.setItem(storageKey, JSON.stringify(results));
+    }
+
+    renderQuiz();
+
+    form.addEventListener('change', (event) => {
+      if (event.target.matches('input[type="radio"]')) {
+        playClickSound();
+      }
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      playClickSound();
+
+      const total = quizData.length;
+      let score = 0;
+
+      for (const item of quizData) {
+        const correctAnswer = item.correct;
+        const selected = form.querySelector(`input[name="${item.id}"]:checked`);
+        if (selected && selected.value === correctAnswer) {
+          score += 1;
+        }
+      }
+
+      const results = loadResults();
+      results.unshift({
+        score,
+        total,
+        date: new Date().toISOString()
+      });
+      saveResults(results.slice(0, 10));
+
+      const isVictory = score >= 5;
+      updateResult(score, total);
+      scoreMessage.textContent = `${scoreMessage.textContent} Résultat enregistré dans le local storage.`;
+      playEndingMusic(isVictory);
+    });
+
+    const savedResults = loadResults();
+    if (savedResults.length > 0) {
+      const latest = savedResults[0];
+      updateResult(latest.score, latest.total, false);
+      scoreMessage.textContent = `Dernier score enregistré : ${latest.score}/${latest.total}.`;
+    }
+  </script>
 </body>
 </html>
