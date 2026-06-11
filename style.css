@@ -95,6 +95,7 @@ h1 {
 }
 
 .quiz-card,
+.share-card,
 .score-panel {
   background: var(--panel);
   backdrop-filter: blur(12px);
@@ -196,6 +197,66 @@ h1 {
 .quiz-card {
   padding: 28px;
   animation: fadeUp 0.85s ease 0.08s both;
+}
+
+.share-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) auto;
+  gap: 24px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 249, 243, 0.9));
+  animation: fadeUp 0.85s ease 0.16s both;
+}
+
+.share-kicker {
+  margin: 0 0 10px;
+  color: var(--accent-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.share-card h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  line-height: 1.15;
+}
+
+.share-text {
+  margin: 12px 0 10px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.share-url {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(31, 35, 48, 0.04);
+  border: 1px solid var(--line);
+  color: var(--text);
+  word-break: break-all;
+}
+
+.qr-frame {
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 247, 241, 0.94));
+  border: 1px solid rgba(31, 35, 48, 0.08);
+  box-shadow: 0 14px 35px rgba(31, 35, 48, 0.08);
+}
+
+.qr-frame img {
+  display: block;
+  width: min(260px, 100%);
+  height: auto;
+  border-radius: 14px;
+  background: white;
 }
 
 .quiz-list {
@@ -360,6 +421,11 @@ button:active {
   }
 
   .quiz-card {
+    padding: 18px;
+  }
+
+  .share-card {
+    grid-template-columns: 1fr;
     padding: 18px;
   }
 

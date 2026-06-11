@@ -33,6 +33,20 @@
       </form>
     </section>
 
+    <section class="share-card" aria-labelledby="share-title">
+      <div>
+        <p class="share-kicker">Partager le quiz</p>
+        <h2 id="share-title">Scanne ce QR code pour ouvrir ce quiz</h2>
+        <p class="share-text">Le QR code pointe vers l’adresse actuelle de la page, pour que tu puisses partager le quiz rapidement sur mobile.</p>
+        <p class="share-url" id="share-url"></p>
+        <button type="button" id="copy-link-button">Copier le lien</button>
+      </div>
+
+      <div class="qr-frame" aria-hidden="true">
+        <img id="qr-code" alt="QR code du quiz Tomodachi Life" />
+      </div>
+    </section>
+
   </main>
 
   <script>
@@ -83,6 +97,9 @@
     const scoreEmoji = document.getElementById('score-emoji');
     const quizList = document.getElementById('quiz-list');
     const glitterLayer = document.getElementById('glitter-layer');
+    const qrCode = document.getElementById('qr-code');
+    const shareUrl = document.getElementById('share-url');
+    const copyLinkButton = document.getElementById('copy-link-button');
 
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     let activeMusicNodes = [];
@@ -278,11 +295,35 @@
       }
     }
 
+    function setupShareCard() {
+      const currentUrl = window.location.href;
+      const qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=12&data=${encodeURIComponent(currentUrl)}`;
+
+      qrCode.src = qrDataUrl;
+      qrCode.width = 260;
+      qrCode.height = 260;
+      shareUrl.textContent = currentUrl;
+
+      copyLinkButton.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(currentUrl);
+          copyLinkButton.textContent = 'Lien copié';
+        } catch {
+          copyLinkButton.textContent = 'Copie impossible';
+        }
+
+        window.setTimeout(() => {
+          copyLinkButton.textContent = 'Copier le lien';
+        }, 1600);
+      });
+    }
+
     function saveResults(results) {
       localStorage.setItem(storageKey, JSON.stringify(results));
     }
 
     renderQuiz();
+    setupShareCard();
 
     form.addEventListener('change', (event) => {
       if (event.target.matches('input[type="radio"]')) {
